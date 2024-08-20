@@ -3,5 +3,3 @@ sibs_build.egg-info/
 dist/
 build/
 __pycache__/
-src/
-pkg/
