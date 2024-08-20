@@ -7,6 +7,7 @@ import pickle
 import subprocess
 import sys
 from ._version import *
+import glob
 
 # complete rewrite of old.py that uses separate functions for things like compiling (which link units do if they contain a SOURCES field)
 # this is a lot more readable and easier to maintain
@@ -558,13 +559,21 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
             if not unit.changed:
                 print(f"Skipping cmake unit '{unit.name}' (no changes)")
 
-
-
-
-
             if unit.cmakebuilddir != "" and unit.changed:
                 commands.append("cmake --build "+unit.cmakebuilddir+" --target "+unit.cmaketarget)
                 continue
+        
+        if 'SOURCES' in unit.dat:
+            # change sources that contain "**" or "*" to glob
+            newsources = ""
+            for source in unit.dat['SOURCES'].split('\n'):
+                if source.strip() == "":
+                    continue
+                if source.find("**") != -1 or source.find("*") != -1:
+                    newsources += "\n".join(glob.glob(source.strip(), recursive=True))+"\n"
+                else:
+                    newsources += source.strip()+"\n"
+            unit.dat['SOURCES'] = newsources
 
         # only if this is our unit, not imported from another
         if unit.directory != os.path.relpath(os.getcwd(), firstpath):
