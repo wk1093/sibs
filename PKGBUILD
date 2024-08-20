@@ -1,3 +1,6 @@
+# Maintainer: wk1093 <wyattk1093@gmail.com>
+
+
 makedepends=(python-build python-installer python-wheel)
 
 pkgname=python-sibs
