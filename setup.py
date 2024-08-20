@@ -11,7 +11,7 @@ setup(
     license='GNU General Public License v3.0',
     packages=['sibs'],
     install_requires=[
-        'distutils',
+        
     ],
     entry_points={
         'console_scripts': [
