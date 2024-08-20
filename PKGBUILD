@@ -1,4 +1,4 @@
-pkgname='python-sibs-build'
+pkgname='python-sibs'
 _module='sibs-build'
 _src_folder='sibs_build-0.1.2'
 pkgver='0.1.2'
