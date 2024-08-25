@@ -9,17 +9,6 @@ import sys
 from ._version import *
 import glob
 
-# complete rewrite of old.py that uses separate functions for things like compiling (which link units do if they contain a SOURCES field)
-# this is a lot more readable and easier to maintain
-# it will also have a new file in the build directory called sibs.hcache which will contain hashes of many different files to prevent unnecessary recompilations
-# it will have hashes of the current build file as well, so if the build file changes, it will be recompiled
-# TODO: maybe add hashes for the cmake files, so if they change, it will be recompiled
-# for now, always recompile cmake targets, but have a hash for the OUTPUT file, so if it changes, dependencies will be recompiled
-# for example, if we recompile the cmake project, but the output libxxx.a doesn't change, then we don't need to recompile anything
-
-# We will also add support for SIBS units (very similar to CMAKE units) but instead of loading cmake, we will load another sibs project
-# similar to cmake's add_subdirectory
-
 # OPTIONS, these can be set by the cmdline
 sibsopt_nohcache = False
 sibsopt_nohashdir = False
@@ -30,6 +19,7 @@ sibsopt_cxxflags = ""
 sibsopt_cxxlflags = ""
 sibsopt_cclflags = ""
 sibsopt_arflags = ""
+sibsopt_showcommands = False
 # sibsopt_nobuild = False
 # sibsopt_nocopy = False
 # sibsopt_nolink = False
@@ -795,6 +785,7 @@ def main():
     global sibsopt_cxxlflags
     global sibsopt_cclflags
     global sibsopt_arflags
+    global sibsopt_showcommands
     charg = ""
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -820,6 +811,8 @@ def main():
                 elif arg.startswith("--debug"):
                     sibsopt_cflags += " -g"
                     sibsopt_ldflags += " -g"
+                elif arg.startswith("--showcommands"):
+                    sibsopt_showcommands = True
                 elif arg == "--help":
                     print("SIBS: Simply Integrated Build System")
                     print("Version: v"+sibsversion)
@@ -875,7 +868,8 @@ def main():
     print(f"Building unit commands done ({len(cmds)} commands)")
     for cmd in cmds:
         c = compilecmd(cmd)
-        print(c)
+        if sibsopt_showcommands:
+            print(c)
         os.system(c)
     
     if len(cmds) == 0:
