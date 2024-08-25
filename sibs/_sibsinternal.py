@@ -23,6 +23,13 @@ import glob
 # OPTIONS, these can be set by the cmdline
 sibsopt_nohcache = False
 sibsopt_nohashdir = False
+sibsopt_cflags = ""
+sibsopt_ccflags = ""
+sibsopt_ldflags = ""
+sibsopt_cxxflags = ""
+sibsopt_cxxlflags = ""
+sibsopt_cclflags = ""
+sibsopt_arflags = ""
 # sibsopt_nobuild = False
 # sibsopt_nocopy = False
 # sibsopt_nolink = False
@@ -752,11 +759,24 @@ def dolink(units: list[BuildUnit], unit: BuildUnit) -> list[str]:
 def compilecmd(cmd: str) -> str:
     # we need to replace the cxx cxxl, cc, ccl, and ar commands
     # TODO: we should make this more robust for other compilers
-    cmd = cmd.replace("$CXXL", "g++")
-    cmd = cmd.replace("$CXX", "g++")
-    cmd = cmd.replace("$CCL", "gcc")
-    cmd = cmd.replace("$CC", "gcc")
-    cmd = cmd.replace("$AR", "ar")
+    # cmd = cmd.replace("$CXXL", "g++")
+    # cmd = cmd.replace("$CXX", "g++")
+    # cmd = cmd.replace("$CCL", "gcc")
+    # cmd = cmd.replace("$CC", "gcc")
+    # cmd = cmd.replace("$AR", "ar")
+    # if the command contains CC or CXX add cflags
+    # if the command contains CC add ccflags
+    # if the command contains CXX add cxxflags
+    # if the command contains CCL or CXXL add ldflags
+    # if the command contains CCL add cclflags
+    # if the command contains CXXL add cxxlflags
+    # if the command contains AR add arflags
+    cmd = cmd.replace("$CXXL", f"g++ {sibsopt_ldflags} {sibsopt_cxxlflags}")
+    cmd = cmd.replace("$CXX", f"g++ {sibsopt_cflags} {sibsopt_cxxflags}")
+    cmd = cmd.replace("$CCL", f"gcc {sibsopt_ldflags} {sibsopt_cclflags}")
+    cmd = cmd.replace("$CC", f"gcc {sibsopt_cflags} {sibsopt_ccflags}")
+    cmd = cmd.replace("$AR", f"ar {sibsopt_arflags}")
+
     return cmd
 
 
@@ -764,6 +784,13 @@ def compilecmd(cmd: str) -> str:
 def main():
     global sibsopt_nohashdir
     global sibsopt_nohcache
+    global sibsopt_cflags
+    global sibsopt_ccflags
+    global sibsopt_ldflags
+    global sibsopt_cxxflags
+    global sibsopt_cxxlflags
+    global sibsopt_cclflags
+    global sibsopt_arflags
     charg = ""
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
@@ -772,14 +799,40 @@ def main():
                     sibsopt_nohashdir = True
                 elif arg == "--nohcache" or arg == "--nopersist":
                     sibsopt_nohcache = True
+                elif arg.startswith("--cflags="):
+                    sibsopt_cflags += " "+arg[len("--cflags="):]
+                elif arg.startswith("--ccflags="):
+                    sibsopt_ccflags += " "+arg[len("--ccflags="):]
+                elif arg.startswith("--ldflags="):
+                    sibsopt_ldflags += " "+arg[len("--ldflags="):]
+                elif arg.startswith("--cxxflags="):
+                    sibsopt_cxxflags += " "+arg[len("--cxxflags="):]
+                elif arg.startswith("--cxxlflags="):
+                    sibsopt_cxxlflags += " "+arg[len("--cxxlflags="):]
+                elif arg.startswith("--cclflags="):
+                    sibsopt_cclflags += " "+arg[len("--cclflags="):]
+                elif arg.startswith("--arflags="):
+                    sibsopt_arflags += " "+arg[len("--arflags="):]
+                elif arg.startswith("--debug"):
+                    sibsopt_cflags += " -g"
+                    sibsopt_ldflags += " -g"
                 elif arg == "--help":
                     print("SIBS: Simply Integrated Build System")
                     print("Version: v"+sibsversion)
                     print("Usage:")
-                    print("python -m sibs (directory) (--nocmakepersist/--nohashdir --nohcache/--nopersist --help)")
+                    print("python -m sibs (directory) (--nocmakepersist/--nohashdir --nohcache/--nopersist --cflags=... --ccflags=... --ldflags=... --cxxflags=... --cxxlflags=... --cclflags=... --arflags=... --debug --help)")
                     print("Options:")
                     print("    --nocmakepersist/nohashdir: Cmake imported projects will not persist between builds, this will make them rebuild every time (very slow)")
                     print("    --nohcache/nopersist: Don't use the hash cache, this will make even local projects rebuild every time, no matter if there are changes (very slow)")
+                    print("    --cflags=: Extra flags to pass to the C/C++ compiler")
+                    print("    --ccflags=: Extra flags to pass to the C compiler")
+                    print("    --cxxflags=: Extra flags to pass to the C++ compiler")
+                    print("    --ldflags=: Extra flags to pass to the C/C++ linker")
+                    print("    --cclflags=: Extra flags to pass to the C linker")
+                    print("    --cxxlflags=: Extra flags to pass to the C++ linker")
+                    print("    --arflags=: Extra flags to pass to the archiver")
+                    print("    --debug: Adds -g to all compile commands")
+
                     print("    --help: Print this help message")
                     exit(0)
 
