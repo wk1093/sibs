@@ -314,6 +314,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 cmakemode = False
                 level -= 1
                 for p in cmakeprojs:
+                    print(f"CMAKE {p}")
                     # we add the cmake loader to the end of the p CMakeLists.txt
                     # then run cmake on it, and then remove the loader
                     with open(p+"/CMakeLists.txt", "r") as f:
@@ -414,7 +415,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 level -= 1
                 for d in sibsdirs:
                     # way simpler than cmake
-                    
+                    print(f"SIBS {d}")
                     a,b = loadunits(d, prefix=prefix+sibsname)
                     units += a
                     commands += b
@@ -526,6 +527,8 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 data = ""
             else:
                 data += line + "\n"
+
+    print(f"Configuring done ({len(units)} units), Optimizing...")
 
     toremove = []
     if not os.path.exists(firstpath+"/build"):
@@ -674,6 +677,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
     for unit in toremove:
         units.remove(unit)
 
+    print(f"Optimizing done ({len(units)} units)")
 
     os.chdir(originalpath)
     return (units, commands)
@@ -853,6 +857,8 @@ def main():
 
 
     units, cmds = loadunits(charg)
+
+    print(f"Building unit commands...")
     
     for unit in units:
         if unit.skip:
@@ -865,9 +871,12 @@ def main():
 
     os.makedirs("build/obj/", exist_ok=True)
     os.makedirs("build/cmake/", exist_ok=True)
+
+    print(f"Building unit commands done ({len(cmds)} commands)")
     for cmd in cmds:
-        print(cmd)
-        os.system(compilecmd(cmd))
+        c = compilecmd(cmd)
+        print(c)
+        os.system(c)
     
     if len(cmds) == 0:
         print("Nothing to build!")
