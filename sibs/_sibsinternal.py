@@ -271,6 +271,8 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
     sibsname = ""
     sibsdirs = []
     gitmode = False
+    buildcmds = False
+    confcmds = False
     for lineus in inplines:
         line = lineus.strip()
         if line.startswith("#"):
@@ -283,6 +285,41 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
             else:
                 # remove JUST the \\
                 line = line[:cmrm_hf-1] + line[cmrm_hf:]
+
+        if line.startswith("BUILDCMDS") and level == 0:
+            # BUILDCMDS {
+            #     echo hi
+            # }
+            level += 1
+            buildcmds = True
+            continue
+        if buildcmds and level == 1:
+            if line.endswith('}'):
+                level -= 1
+                buildcmds = False
+                continue
+            else:
+                commands.append(line.strip())
+                continue
+
+        if line.startswith("CONFCMDS") and level == 0:
+            # CONFCMDS {
+            #     echo hi
+            # }
+            level += 1
+            confcmds = True
+            continue
+        if confcmds and level == 1:
+            if line.endswith('}'):
+                level -= 1
+                confcmds = False
+                continue
+            else:
+                subprocess.run(line.strip(), capture_output=True)
+                continue
+
+
+
         
         if line.startswith("CMAKE") and level == 0:
             # Cmake units are special
