@@ -84,6 +84,7 @@ class BuildUnit:
     changed: bool = True
     cmakebuilddir: str = ""
     cmaketarget: str = ""
+    prefix: str = ""
 
 class CmakeUnitLoad:
     def __init__(self, unitstr: str, directory: str):
@@ -192,6 +193,12 @@ def getdirectdeps(units: list[BuildUnit], unit: BuildUnit) -> list[BuildUnit]:
             if dep == un.directory:
                 dp = un
                 break
+            if un.prefix + dep == un.name:
+                dp = un
+                break
+            if dep.endswith(un.name) and un.prefix in dep:
+                dp = un
+                break
         
         if dp == None:
             print(f"Dependency '{dep}' not found!")
@@ -218,6 +225,12 @@ def getdeps(units: list[BuildUnit], unit: BuildUnit) -> list[BuildUnit]:
                 dp = un
                 break
             if dep == un.directory:
+                dp = un
+                break
+            if un.prefix + dep == un.name:
+                dp = un
+                break
+            if dep.endswith(un.name) and un.prefix in dep:
                 dp = un
                 break
         if dp == None:
@@ -418,6 +431,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                         bu.cmaketarget = cu.name
 
                         bu.directory = os.path.abspath(p)
+                        bu.prefix = prefix
                         units.append(bu)
             else:
                 cmakeprojs.append(line.strip())
@@ -540,6 +554,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
 
         if currentunit != None and level == 1:
             if line.endswith('}'):
+                currentunit.prefix = prefix
                 units.append(currentunit)
                 currentunit = None
                 level -= 1
