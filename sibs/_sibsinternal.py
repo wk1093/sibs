@@ -354,6 +354,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 cmakemode = False
                 level -= 1
                 for p in cmakeprojs:
+                    p = p.replace("$BUILDDIR", os.path.join(firstpath, "build"))
                     print(f"CMAKE {p}")
                     # we add the cmake loader to the end of the p CMakeLists.txt
                     # then run cmake on it, and then remove the loader
