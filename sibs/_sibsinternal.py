@@ -315,7 +315,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 confcmds = False
                 continue
             else:
-                subprocess.run(line.strip(), capture_output=True)
+                os.system(line.strip()) 
                 continue
 
 
