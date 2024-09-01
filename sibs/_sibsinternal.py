@@ -634,6 +634,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
         if unit.directory != os.path.relpath(os.getcwd(), firstpath):
             continue
         if 'INCLUDE' in unit.dat:
+            unit.dat['INCLUDE'] = unit.dat['INCLUDE'].replace("$BUILDDIR", os.path.join(firstpath, "build"))
             includes = unit.dat['INCLUDE'].split('\n')
             for inc in includes:
                 if inc.strip() == "":
