@@ -484,6 +484,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                 stp = line.strip().split()
                 url = stp[0]
                 directory = stp[1]
+                directory = directory.replace("$BUILDDIR", os.path.join(firstpath, "build"))
                 if len(stp) > 2:
                     tag = stp[2]
                 else:
@@ -619,6 +620,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
             # change sources that contain "**" or "*" to glob
             newsources = ""
             for source in unit.dat['SOURCES'].split('\n'):
+                source = source.strip().replace("$BUILDDIR", os.path.join(firstpath, "build"))
                 if source.strip() == "":
                     continue
                 if source.find("**") != -1 or source.find("*") != -1:
@@ -881,6 +883,7 @@ def main():
                     print("    --cxxlflags=: Extra flags to pass to the C++ linker")
                     print("    --arflags=: Extra flags to pass to the archiver")
                     print("    --debug: Adds -g to all compile commands")
+                    print("    --showcommands: Shows the commands that will be executed")
 
                     print("    --help: Print this help message")
                     exit(0)
