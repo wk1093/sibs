@@ -372,7 +372,7 @@ def loadunits(path: str, prefix: str = "") -> tuple[list[BuildUnit], list[str]]:
                     # os.system(f"cmake -B {builddir} {p} > "+os.path.join(firstpath, "build/cmake/cmake.log"))
                     # use subprocess to capture the output
                     a = subprocess.run(["cmake", "-B", builddir, p], capture_output=True)
-                    with open (os.path.join(firstpath, "build/cmake/cmake"+p.replace("/", "_").replace("\\", "_")+".log"), "w") as f:
+                    with open (os.path.join(firstpath, "build/cmake/cmake"+p.replace("/", "_").replace("\\", "_").replace(":", "_")+".log"), "w") as f:
                         f.write(a.stdout.decode())
                     if a.returncode != 0:
                         print(f"Error: cmake failed for {p}:")
